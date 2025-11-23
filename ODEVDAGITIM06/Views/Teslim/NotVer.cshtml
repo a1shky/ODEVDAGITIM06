@@ -1,0 +1,70 @@
+﻿@model ODEVDAGITIM06.Models.Teslim
+@* O hatalı @using System.IO; satırı buradan kaldırıldı *@
+
+@{
+    ViewData["Title"] = "Not Ver";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1 class="h3 mb-2 text-gray-800">Not Ver / Teslimi İncele</h1>
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Teslim Detayları</h6>
+    </div>
+    <div class="card-body">
+
+        <!-- Detay Bilgileri -->
+        <dl class="row mb-4">
+            <dt class="col-sm-3">Teslim ID</dt>
+            <dd class="col-sm-9">@Model.TeslimId</dd>
+
+            <dt class="col-sm-3">Ödev ID</dt>
+            <dd class="col-sm-9">@Model.OdevId</dd>
+
+            <dt class="col-sm-3">Teslim Tarihi</dt>
+            <dd class="col-sm-9">@Model.TeslimTarihi.ToString("dd.MM.yyyy HH:mm")</dd>
+
+            <!-- GÜNCELLENDİ: Hatanın düzeltilmiş hali (Tam yoluyla) -->
+            <dt class="col-sm-3">Teslim Edilen Dosya</dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.DosyaYolu))
+                {
+                    <!-- DÜZELTME: System.IO.Path.GetFileName kullandık -->
+                    <a href="@Url.Content(Model.DosyaYolu)" target="_blank" class="btn btn-info">
+                        <i class="fas fa-file-download"></i> @System.IO.Path.GetFileName(Model.DosyaYolu) (Yeni Sekmede Aç)
+                    </a>
+                }
+                else
+                {
+                    <span>(Dosya Yok)</span>
+                }
+            </dd>
+        </dl>
+
+        <!-- Not Verme Formu -->
+        <div class="row">
+            <div class="col-md-6">
+                <form asp-action="NotVer" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="TeslimId" />
+                    <input type="hidden" asp-for="OdevId" />
+                    <input type="hidden" asp-for="DosyaYolu" />
+                    <input type="hidden" asp-for="TeslimTarihi" />
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Not" class="control-label">Verilen Not (0-100)</label>
+                        <input asp-for="Not" class="form-control" type="number" min="0" max="100" />
+                        <span asp-validation-for="Not" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="submit" value="Notu Kaydet" class="btn btn-primary" />
+                        <a asp-action="Index" class="btn btn-light">Listeye Geri Dön</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

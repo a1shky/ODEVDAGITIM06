@@ -1,0 +1,67 @@
+﻿@model ODEVDAGITIM06.Models.Odev
+
+@{
+    ViewData["Title"] = "Ödev Düzenle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Admin şablonumuzu kullan
+}
+
+<h1 class="h3 mb-2 text-gray-800">Ödev Düzenle</h1>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Form, OdevController'daki [HttpPost] Edit metoduna gider -->
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- ÇOK ÖNEMLİ: Hangi ödevi güncellediğimizi bilmek için ID'yi gizli (hidden) olarak tutmalıyız -->
+                    <input type="hidden" asp-for="OdevId" />
+
+                    <!-- ÇOK ÖNEMLİ 2: 'OlusturmaTarihi'ni formda göstermiyoruz ama
+                         güncelleme (POST) sırasında kaybolmaması için onu da gizli olarak taşımalıyız -->
+                    <input type="hidden" asp-for="OlusturmaTarihi" />
+
+
+                    <!-- Hangi Derse ait? (Açılır Liste) -->
+                    <!-- Controller'dan (Edit GET) gelen ViewBag.DersListesi'ni burada kullanıyoruz -->
+                    <!-- asp-for="DersId" sayesinde o anki ödevin dersi otomatik seçili gelir -->
+                    <div class="form-group mb-3">
+                        <label asp-for="DersId" class="control-label">Hangi Ders?</label>
+                        <select asp-for="DersId" class="form-control" asp-items="ViewBag.DersListesi">
+                            <option value="">-- Bir Ders Seçin --</option>
+                        </select>
+                        <span asp-validation-for="DersId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Diğer alanlar (asp-for sayesinde bilgilerle dolu gelir) -->
+                    <div class="form-group mb-3">
+                        <label asp-for="OdevBasligi" class="control-label">Ödev Başlığı</label>
+                        <input asp-for="OdevBasligi" class="form-control" />
+                        <span asp-validation-for="OdevBasligi" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Aciklama" class="control-label">Açıklama</label>
+                        <textarea asp-for="Aciklama" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Aciklama" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="TeslimTarihi" class="control-label">Son Teslim Tarihi</label>
+                        <input asp-for="TeslimTarihi" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="TeslimTarihi" class="text-danger"></span>
+                    </div>
+
+                    <!-- Butonlar -->
+                    <div class="form-group mb-3">
+                        <input type="submit" value="Güncelle" class="btn btn-primary" /> <!-- Buton rengi değişti -->
+                        <a asp-action="Index" class="btn btn-light">Listeye Geri Dön</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

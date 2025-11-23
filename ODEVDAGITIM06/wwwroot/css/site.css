@@ -1,0 +1,45 @@
+/* Projenin temel stilleri */
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn.active:focus,
+.form-control:focus, .form-control:active:focus, .form-control.active:focus,
+.custom-control-label::before,
+.custom-file-label::after,
+.custom-file-label::before {
+    box-shadow: none;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+/* Body'yi flex yaptýk (Bu, _Layout.cshtml'deki body etiketine 
+   d-flex flex-column min-vh-100 eklediðimiz için önemlidir)
+   Bu, footer'ýn (altbilgi) her zaman en altta kalmasýný saðlar.
+*/
+body {
+    /* margin-bottom: 60px; Bu artýk gerekli deðil */
+}
+
+
+/* YENÝ EKLENDÝ: Güzelleþtirme (Hover Efekti) */
+.card-hover {
+    /* Geçiþ efekti 0.3 saniye sürsün */
+    transition: all 0.3s ease-in-out;
+}
+
+    .card-hover:hover {
+        /* Üzerine gelince kartý hafifçe büyüt */
+        transform: scale(1.03);
+        /* Gölgeyi daha belirgin yap */
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.20) !important;
+    }

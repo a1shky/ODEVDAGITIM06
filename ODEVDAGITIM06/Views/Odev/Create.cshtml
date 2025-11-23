@@ -1,0 +1,57 @@
+﻿@model ODEVDAGITIM06.Models.Odev
+
+@{
+    ViewData["Title"] = "Yeni Ödev Ekle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Admin şablonumuzu kullan
+}
+
+<h1 class="h3 mb-2 text-gray-800">Yeni Ödev Ekle</h1>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Form, OdevController'daki [HttpPost] Create metoduna gider -->
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <!-- En Önemli Kısım: Hangi Derse ait? (Açılır Liste) -->
+                    <div class="form-group mb-3">
+                        <label asp-for="DersId" class="control-label">Hangi Ders?</label>
+                        <!-- Controller'dan gelen ViewBag.DersListesi'ni burada kullanıyoruz -->
+                        <select asp-for="DersId" class="form-control" asp-items="ViewBag.DersListesi">
+                            <option value="">-- Bir Ders Seçin --</option>
+                        </select>
+                        <span asp-validation-for="DersId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="OdevBasligi" class="control-label">Ödev Başlığı</label>
+                        <input asp-for="OdevBasligi" class="form-control" />
+                        <span asp-validation-for="OdevBasligi" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Aciklama" class="control-label">Açıklama</label>
+                        <textarea asp-for="Aciklama" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="Aciklama" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="TeslimTarihi" class="control-label">Son Teslim Tarihi</label>
+                        <!-- type="datetime-local" güzel bir tarih/saat seçici çıkarır -->
+                        <input asp-for="TeslimTarihi" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="TeslimTarihi" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <input type="submit" value="Kaydet" class="btn btn-success" />
+                        <a asp-action="Index" class="btn btn-light">Listeye Geri Dön</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

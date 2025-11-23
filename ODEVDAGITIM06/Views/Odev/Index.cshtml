@@ -1,0 +1,121 @@
+﻿@model IEnumerable<ODEVDAGITIM06.Models.Odev>
+
+@{
+    ViewData["Title"] = "Ödev Listesi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Admin şablonumuzu kullan
+}
+
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Ödev Yönetimi</h1>
+<p class="mb-4">
+    Burada sistemdeki tüm ödevleri yönetebilirsiniz.
+    <a asp-action="Create" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus"></i> Yeni Ödev Ekle
+    </a>
+</p>
+
+<!-- Ödev Listesi Tablosu -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Ödev Listesi</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Ödev Başlığı</th>
+                        <th>Hangi Ders?</th>
+                        <th>Oluşturma Tarihi</th>
+                        <th>Teslim Tarihi</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr id="row-@item.OdevId">
+                            <td>@item.OdevBasligi</td>
+                            <td>@item.Ders?.DersAdi</td>
+                            <td>@item.OlusturmaTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@item.TeslimTarihi.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <!-- GÜNCELLENDİ: Düzenle Butonu -->
+                                <!-- Artık /Odev/Edit/{id} adresine yönlendiriyor (örn: /Odev/Edit/5) -->
+                                <a asp-action="Edit" asp-route-id="@item.OdevId" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Düzenle
+                                </a>
+
+                                <!-- Sil Butonu (AJAX ile çalışıyordu) -->
+                                <a href="#" class="btn btn-danger btn-sm btn-sil" data-toggle="modal" data-target="#deleteModal" data-id="@item.OdevId">
+                                    <i class="fas fa-trash"></i> Sil
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- Silme Onay Kutucuğu (Modal) (Bu zaten vardı) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Ödevi Silme Onayı</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Bu ödevi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">İptal</button>
+                <button id="btnConfirmDelete" class="btn btn-danger">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- AJAX için JavaScript Kodları (Bu zaten vardı) -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            var silinecekOdevId;
+
+            $('#deleteModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                silinecekOdevId = button.data('id');
+            });
+
+            $('#btnConfirmDelete').on('click', function () {
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/Odev/Delete',
+                    data: { id: silinecekOdevId },
+                    success: function (response) {
+                        if (response.success) {
+                            $('#row-' + silinecekOdevId).fadeOut('slow', function () {
+                                $(this).remove();
+                            });
+                            $('#deleteModal').modal('hide');
+                        } else {
+                            alert(response.message);
+                            $('#deleteModal').modal('hide');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Silme işlemi sırasında bir sunucu hatası oluştu.");
+                    }
+                });
+
+            });
+
+        });
+    </script>
+}

@@ -1,0 +1,129 @@
+﻿@model IEnumerable<ODEVDAGITIM06.Models.Ders>
+
+@{
+    ViewData["Title"] = "Ders Listesi";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Admin şablonumuzu kullan
+}
+
+<!-- Page Heading -->
+<h1 class="h3 mb-2 text-gray-800">Ders Yönetimi</h1>
+<p class="mb-4">
+    Burada sistemdeki tüm dersleri yönetebilirsiniz.
+    <a asp-action="Create" class="btn btn-primary btn-sm">
+        <i class="fas fa-plus"></i> Yeni Ders Ekle
+    </a>
+</p>
+
+<!-- Hata Mesajı (eğer Controller'dan gelirse) -->
+@if (ViewBag.ErrorMessage != null)
+{
+    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+}
+
+
+<!-- DataTales Örneği -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Ders Listesi</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Ders Adı</th>
+                        <th>Ders Kodu</th>
+                        <th>Açıklama</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <!-- Orijinal çalışan halimiz: Satıra ID verdik -->
+                        <tr id="row-@item.DersId">
+                            <td>@item.DersAdi</td>
+                            <td>@item.DersKodu</td>
+                            <td>@item.DersAciklamasi</td>
+                            <td>
+                                <!-- Düzenle Butonu -->
+                                <a asp-action="Edit" asp-route-id="@item.DersId" class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Düzenle
+                                </a>
+
+                                <!-- Orijinal çalışan Sil Butonumuz (Modal'ı tetikleyen) -->
+                                <a href="#" class="btn btn-danger btn-sm btn-sil" data-toggle="modal" data-target="#deleteModal" data-id="@item.DersId">
+                                    <i class="fas fa-trash"></i> Sil
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<!-- GERİ GELDİ: Silme Onay Kutucuğu (Modal) -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Dersi Silme Onayı</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">Bu dersi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">İptal</button>
+                <button id="btnConfirmDelete" class="btn btn-danger">Evet, Sil</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- GERİ GELDİ: Orijinal Çalışan AJAX Script'imiz -->
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            var silinecekDersId;
+
+            $('#deleteModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                silinecekDersId = button.data('id');
+            });
+
+            $('#btnConfirmDelete').on('click', function () {
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/Ders/Delete',
+                    data: { id: silinecekDersId },
+                    success: function (response) {
+                        if (response.success) {
+
+                            // Sayfayı yenilemeden, satırı kaybetme efekti
+                            $('#row-' + silinecekDersId).fadeOut('slow', function () {
+                                $(this).remove();
+                            });
+                            $('#deleteModal').modal('hide');
+                        } else {
+                            // Controller'dan hata mesajı gelirse (örn: Derse bağlı ödev var)
+                            alert(response.message);
+                            $('#deleteModal').modal('hide');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Silme işlemi sırasında bir sunucu hatası oluştu.");
+                    }
+                });
+
+            });
+
+        });
+    </script>
+}

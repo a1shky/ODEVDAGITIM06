@@ -1,0 +1,37 @@
+﻿@model ODEVDAGITIM06.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Giriş Yap";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Ana site şablonunu kullan
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h2 class="text-center">Yönetici Girişi</h2>
+        <hr />
+        <form asp-action="Index" method="post">
+            <!-- Hata mesajlarını göstermek için (örn: "Kullanıcı adı yanlış") -->
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label">Kullanıcı Adı</label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Şifre</label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Giriş Yap</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        // Formdaki 'Required' gibi anlık doğrulamalar için bu şart.
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

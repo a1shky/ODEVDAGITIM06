@@ -1,0 +1,43 @@
+﻿@model ODEVDAGITIM06.Models.Ders
+
+@{
+    ViewData["Title"] = "Yeni Ders Ekle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Admin şablonumuzu kullan
+}
+
+<h1 class="h3 mb-2 text-gray-800">Yeni Ders Ekle</h1>
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Form, DersController'daki [HttpPost] Create metoduna gider -->
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="DersAdi" class="control-label">Ders Adı</label>
+                        <input asp-for="DersAdi" class="form-control" />
+                        <span asp-validation-for="DersAdi" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="DersKodu" class="control-label">Ders Kodu</label>
+                        <input asp-for="DersKodu" class="form-control" />
+                        <span asp-validation-for="DersKodu" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="DersAciklamasi" class="control-label">Açıklama</label>
+                        <textarea asp-for="DersAciklamasi" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="DersAciklamasi" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <input type="submit" value="Kaydet" class="btn btn-success" />
+                        <a asp-action="Index" class="btn btn-light">Listeye Geri Dön</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
