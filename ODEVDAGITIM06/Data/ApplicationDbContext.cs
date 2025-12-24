@@ -1,16 +1,21 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ODEVDAGITIM06.Models; // Proje adına göre güncellendi
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // Identity için gerekli
+using Microsoft.EntityFrameworkCore;
+using ODEVDAGITIM06.Models;
 
-namespace ODEVDAGITIM06.Data // Proje adına göre güncellendi
+namespace ODEVDAGITIM06.Data
 {
-    public class ApplicationDbContext : DbContext
+    // DİKKAT: Artık 'DbContext' değil, 'IdentityDbContext<ApplicationUser>'den miras alıyoruz.
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
         }
 
-        public DbSet<Ders> Dersler { get; set; }
-        public DbSet<Odev> Odevler { get; set; }
-        public DbSet<Teslim> Teslimler { get; set; }
+        // Repositorylerde genelde tekil isim (_context.Teslim gibi) kullandığımız için 
+        // buradaki isimleri de TEKİL (Singular) yaptık.
+
+        public DbSet<Ders> Ders { get; set; }    // Dersler -> Ders oldu
+        public DbSet<Odev> Odev { get; set; }    // Odevler -> Odev oldu
+        public DbSet<Teslim> Teslim { get; set; } // Teslimler -> Teslim oldu (HATAYI ÇÖZEN KISIM)
     }
 }

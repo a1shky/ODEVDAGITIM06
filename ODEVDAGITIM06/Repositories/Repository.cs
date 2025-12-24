@@ -1,46 +1,54 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ODEVDAGITIM06.Data;
-using ODEVDAGITIM06.Repositories.Interfaces; // GÜNCELLENDİ: Yeni adresini ekledik
-using System.Linq.Expressions;
+using ODEVDAGITIM06.Repositories.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ODEVDAGITIM06.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
         protected readonly ApplicationDbContext _context;
-        private readonly DbSet<T> _dbSet;
+        internal DbSet<T> dbSet;
 
         public Repository(ApplicationDbContext context)
         {
             _context = context;
-            _dbSet = _context.Set<T>();
+            this.dbSet = _context.Set<T>();
         }
 
         public void Add(T entity)
         {
-            _dbSet.Add(entity);
+            dbSet.Add(entity);
             _context.SaveChanges();
         }
 
-        public void Delete(T entity)
+        // --- İŞTE BURASI ÇOK ÖNEMLİ ---
+        // IRepository'de "int id" demiştik, burada da "int id" olmak ZORUNDA.
+        public void Delete(int id)
         {
-            _dbSet.Remove(entity);
-            _context.SaveChanges();
+            T entity = dbSet.Find(id);
+            if (entity != null)
+            {
+                dbSet.Remove(entity);
+                _context.SaveChanges();
+            }
         }
 
         public IEnumerable<T> GetAll()
         {
-            return _dbSet.ToList();
+            return dbSet.ToList();
         }
 
         public T GetById(int id)
         {
-            return _dbSet.Find(id);
+            return dbSet.Find(id);
         }
 
         public void Update(T entity)
         {
-            _dbSet.Update(entity);
+            dbSet.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
             _context.SaveChanges();
         }
     }

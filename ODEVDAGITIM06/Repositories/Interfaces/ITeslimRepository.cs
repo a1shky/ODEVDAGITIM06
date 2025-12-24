@@ -1,11 +1,14 @@
 ﻿using ODEVDAGITIM06.Models;
+using System.Collections.Generic;
 
 namespace ODEVDAGITIM06.Repositories.Interfaces
 {
-    // IRepository'deki tüm temel metotları 'Teslim' için miras alır.
     public interface ITeslimRepository : IRepository<Teslim>
     {
-        // YENİ EKLENDİ: Teslimleri, ilişkili olduğu 'Ödev' ve 'Ders' bilgisiyle birlikte getirecek bir metot.
+        // Listeleme sayfasında kullandığın metot
         IEnumerable<Teslim> GetAllWithOdevDers();
+
+        // YENİ EKLEDİĞİMİZ METOT: Detaylarıyla (Öğrenci+Ödev) getirme
+        Teslim GetByIdWithDetails(int id);
     }
 }

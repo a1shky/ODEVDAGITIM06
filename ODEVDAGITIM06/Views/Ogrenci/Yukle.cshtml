@@ -1,0 +1,55 @@
+﻿@model ODEVDAGITIM06.Models.Odev
+
+@{
+    ViewData["Title"] = "Ödev Yükle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">
+                        <i class="fas fa-file-upload"></i> Ödev Gönderme Ekranı
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-4 text-center">
+                        <h4 class="text-gray-900 font-weight-bold">@Model.OdevBasligi</h4>
+                        <p class="text-muted">@Model.Ders?.DersAdi</p>
+                        <div class="alert alert-warning d-inline-block">
+                            Son Teslim: <strong>@Model.TeslimTarihi.ToString("dd.MM.yyyy HH:mm")</strong>
+                        </div>
+                    </div>
+                    <hr />
+
+                    <form asp-controller="Ogrenci" asp-action="Yukle" asp-route-id="@Model.OdevId" method="post" enctype="multipart/form-data">
+
+                        @Html.AntiForgeryToken()
+                        <div class="text-danger mb-3">@Html.ValidationSummary(false)</div>
+
+                        <input type="hidden" name="id" value="@Model.OdevId" />
+
+                        <div class="form-group mb-4">
+                            <label for="dosya" class="font-weight-bold">Dosya Seçiniz:</label>
+
+                            <input type="file" id="dosya" name="dosya" class="form-control-file border p-2 rounded" required />
+
+                            <small class="form-text text-muted mt-2">
+                                <i class="fas fa-info-circle"></i> Sadece PDF, Word, ZIP veya RAR dosyaları.
+                            </small>
+                        </div>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                <i class="fas fa-paper-plane"></i> Ödevi Gönder
+                            </button>
+                            <a asp-controller="Ogrenci" asp-action="Index" class="btn btn-secondary btn-lg ml-2">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

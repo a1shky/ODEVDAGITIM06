@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations; // Hata mesajları için bu kütüphane ŞART!
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema; // ForeignKey için gerekli
 
 namespace ODEVDAGITIM06.Models
 {
@@ -8,10 +9,10 @@ namespace ODEVDAGITIM06.Models
 
         [Required(ErrorMessage = "Ödev Başlığı alanı zorunludur.")]
         [Display(Name = "Ödev Başlığı")]
-        public string OdevBasligi { get; set; } // '?' işaretini kaldırdık
+        public string OdevBasligi { get; set; }
 
         [Display(Name = "Açıklama")]
-        public string? Aciklama { get; set; } // Açıklama zorunlu değil, '?' kalabilir
+        public string? Aciklama { get; set; }
 
         public DateTime OlusturmaTarihi { get; set; }
 
@@ -19,9 +20,17 @@ namespace ODEVDAGITIM06.Models
         [Display(Name = "Son Teslim Tarihi")]
         public DateTime TeslimTarihi { get; set; }
 
-        [Required(ErrorMessage = "Lütfen bir ders seçin.")] // Dropdown için
+        [Required(ErrorMessage = "Lütfen bir ders seçin.")]
         [Display(Name = "Ders")]
         public int DersId { get; set; }
         public virtual Ders? Ders { get; set; }
+
+        // --- YENİ EKLENEN KISIM: KİŞİYE ÖZEL ÖDEV ---
+
+        [Display(Name = "Öğrenci (Kime Atanacak?)")]
+        public string? OgrenciId { get; set; } // Hangi öğrenciye atandığı
+
+        [ForeignKey("OgrenciId")]
+        public virtual ApplicationUser? Ogrenci { get; set; }
     }
 }

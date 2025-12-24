@@ -1,33 +1,46 @@
 using Microsoft.EntityFrameworkCore;
 using ODEVDAGITIM06.Data;
+using ODEVDAGITIM06.Models; // ApplicationUser için
 using ODEVDAGITIM06.Repositories;
 using ODEVDAGITIM06.Repositories.Interfaces;
-using Microsoft.AspNetCore.Authentication.Cookies; // 1. EKLENDÝ
+using Microsoft.AspNetCore.Identity; // Identity için
+using ODEVDAGITIM06.Hubs; // 1. ADIMDA OLUÞTURDUÐUN HUB ÝÇÝN EKLEDÝK
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Veritabaný baðlantýsýný (DbContext) servislere ekliyoruz.
+// --- SIGNALR SERVÝSÝNÝ EKLEDÝK ---
+builder.Services.AddSignalR();
+
+// Veritabaný Baðlantýsý
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Repository'lerimizi servislere ekliyoruz.
+// --- IDENTITY KURULUMU BAÞLANGIÇ ---
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 3;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+});
+// --- IDENTITY KURULUMU BÝTÝÞ ---
+
+// Repository'ler
 builder.Services.AddScoped<IDersRepository, DersRepository>();
 builder.Services.AddScoped<IOdevRepository, OdevRepository>();
 builder.Services.AddScoped<ITeslimRepository, TeslimRepository>();
-
-// Cookie bazlý kimlik doðrulama servisini ekliyoruz (2. EKLENDÝ)
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Login/Index"; // Giriþ yapýlmamýþsa yönlendirilecek sayfa
-        options.LogoutPath = "/Login/Logout"; // Çýkýþ yapma sayfasý
-        options.AccessDeniedPath = "/Login/AccessDenied"; // Yetkisi yoksa yönlendirilecek sayfa
-        options.Cookie.Name = "OdevPortaliCookie"; // Oluþturulacak çerezin adý
-    });
-
 
 var app = builder.Build();
 
@@ -43,9 +56,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication(); // 3. EKLENDÝ (UseAuthorization'dan önce olmalý)
-
+app.UseAuthentication();
 app.UseAuthorization();
+
+// --- SIGNALR HUB ROTASINI TANIMLADIK ---
+app.MapHub<BildirimHub>("/bildirimHub");
 
 app.MapControllerRoute(
     name: "default",

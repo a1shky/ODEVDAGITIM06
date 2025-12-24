@@ -1,5 +1,4 @@
 ﻿@model ODEVDAGITIM06.Models.Teslim
-@* O hatalı @using System.IO; satırı buradan kaldırıldı *@
 
 @{
     ViewData["Title"] = "Not Ver";
@@ -14,54 +13,93 @@
     </div>
     <div class="card-body">
 
-        <!-- Detay Bilgileri -->
         <dl class="row mb-4">
+
+            <dt class="col-sm-3">Öğrenci Adı</dt>
+            <dd class="col-sm-9">
+                @if (Model.Ogrenci != null)
+                {
+                    <span class="font-weight-bold text-dark">@Model.Ogrenci.Ad @Model.Ogrenci.Soyad</span>
+                    <span class="text-muted ml-2">(No: @Model.Ogrenci.OgrenciNo)</span>
+                }
+                else
+                {
+                    <span class="badge badge-danger">Öğrenci Bilgisi Bulunamadı</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Ders / Ödev</dt>
+            <dd class="col-sm-9">
+                @if (Model.Odev != null)
+                {
+                    <strong class="text-primary">@Model.Odev.Ders?.DersAdi</strong>
+                    <span class="text-gray-600"> - @Model.Odev.OdevBasligi</span>
+                }
+                else
+                {
+                    <span class="text-muted">Ödev bilgisi silinmiş.</span>
+                }
+            </dd>
+
+            <hr class="col-sm-12 my-2">
             <dt class="col-sm-3">Teslim ID</dt>
             <dd class="col-sm-9">@Model.TeslimId</dd>
-
-            <dt class="col-sm-3">Ödev ID</dt>
-            <dd class="col-sm-9">@Model.OdevId</dd>
 
             <dt class="col-sm-3">Teslim Tarihi</dt>
             <dd class="col-sm-9">@Model.TeslimTarihi.ToString("dd.MM.yyyy HH:mm")</dd>
 
-            <!-- GÜNCELLENDİ: Hatanın düzeltilmiş hali (Tam yoluyla) -->
             <dt class="col-sm-3">Teslim Edilen Dosya</dt>
             <dd class="col-sm-9">
                 @if (!string.IsNullOrEmpty(Model.DosyaYolu))
                 {
-                    <!-- DÜZELTME: System.IO.Path.GetFileName kullandık -->
-                    <a href="@Url.Content(Model.DosyaYolu)" target="_blank" class="btn btn-info">
-                        <i class="fas fa-file-download"></i> @System.IO.Path.GetFileName(Model.DosyaYolu) (Yeni Sekmede Aç)
+                    <a href="@Url.Content(Model.DosyaYolu)" target="_blank" class="btn btn-info btn-icon-split">
+                        <span class="icon text-white-50">
+                            <i class="fas fa-file-download"></i>
+                        </span>
+                        <span class="text">@System.IO.Path.GetFileName(Model.DosyaYolu) (İndir)</span>
                     </a>
                 }
                 else
                 {
-                    <span>(Dosya Yok)</span>
+                    <span class="text-muted font-italic">(Dosya Yüklenmemiş)</span>
                 }
             </dd>
         </dl>
 
-        <!-- Not Verme Formu -->
+        <hr />
+
         <div class="row">
             <div class="col-md-6">
+                <h5 class="mb-3 text-gray-800">Değerlendirme</h5>
                 <form asp-action="NotVer" method="post">
                     @Html.AntiForgeryToken()
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                     <input type="hidden" asp-for="TeslimId" />
                     <input type="hidden" asp-for="OdevId" />
-                    <input type="hidden" asp-for="DosyaYolu" />
+                    <input type="hidden" asp-for="OgrenciId" /> <input type="hidden" asp-for="DosyaYolu" />
                     <input type="hidden" asp-for="TeslimTarihi" />
 
                     <div class="form-group mb-3">
-                        <label asp-for="Not" class="control-label">Verilen Not (0-100)</label>
-                        <input asp-for="Not" class="form-control" type="number" min="0" max="100" />
+                        <label asp-for="Not" class="control-label font-weight-bold">Verilen Not (0-100)</label>
+                        <input asp-for="Not" class="form-control form-control-lg" type="number" min="0" max="100" placeholder="Notu buraya girin..." />
                         <span asp-validation-for="Not" class="text-danger"></span>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <input type="submit" value="Notu Kaydet" class="btn btn-primary" />
-                        <a asp-action="Index" class="btn btn-light">Listeye Geri Dön</a>
+                    <div class="form-group mt-4">
+                        <button type="submit" class="btn btn-success btn-icon-split btn-lg">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-check"></i>
+                            </span>
+                            <span class="text">Notu Kaydet</span>
+                        </button>
+
+                        <a asp-action="Index" class="btn btn-secondary btn-icon-split btn-lg ml-2">
+                            <span class="icon text-white-50">
+                                <i class="fas fa-arrow-left"></i>
+                            </span>
+                            <span class="text">Listeye Dön</span>
+                        </a>
                     </div>
                 </form>
             </div>

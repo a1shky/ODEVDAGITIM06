@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ODEVDAGITIM06.Data;
 
@@ -11,9 +12,11 @@ using ODEVDAGITIM06.Data;
 namespace ODEVDAGITIM06.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251212174437_IdentityKurulumu")]
+    partial class IdentityKurulumu
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,7 +255,7 @@ namespace ODEVDAGITIM06.Migrations
 
                     b.HasKey("DersId");
 
-                    b.ToTable("Ders");
+                    b.ToTable("Dersler");
                 });
 
             modelBuilder.Entity("ODEVDAGITIM06.Models.Odev", b =>
@@ -273,9 +276,6 @@ namespace ODEVDAGITIM06.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OgrenciId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("OlusturmaTarihi")
                         .HasColumnType("datetime2");
 
@@ -286,9 +286,7 @@ namespace ODEVDAGITIM06.Migrations
 
                     b.HasIndex("DersId");
 
-                    b.HasIndex("OgrenciId");
-
-                    b.ToTable("Odev");
+                    b.ToTable("Odevler");
                 });
 
             modelBuilder.Entity("ODEVDAGITIM06.Models.Teslim", b =>
@@ -308,9 +306,6 @@ namespace ODEVDAGITIM06.Migrations
                     b.Property<int>("OdevId")
                         .HasColumnType("int");
 
-                    b.Property<string>("OgrenciId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("TeslimTarihi")
                         .HasColumnType("datetime2");
 
@@ -318,9 +313,7 @@ namespace ODEVDAGITIM06.Migrations
 
                     b.HasIndex("OdevId");
 
-                    b.HasIndex("OgrenciId");
-
-                    b.ToTable("Teslim");
+                    b.ToTable("Teslimler");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -382,13 +375,7 @@ namespace ODEVDAGITIM06.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ODEVDAGITIM06.Models.ApplicationUser", "Ogrenci")
-                        .WithMany()
-                        .HasForeignKey("OgrenciId");
-
                     b.Navigation("Ders");
-
-                    b.Navigation("Ogrenci");
                 });
 
             modelBuilder.Entity("ODEVDAGITIM06.Models.Teslim", b =>
@@ -399,13 +386,7 @@ namespace ODEVDAGITIM06.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ODEVDAGITIM06.Models.ApplicationUser", "Ogrenci")
-                        .WithMany()
-                        .HasForeignKey("OgrenciId");
-
                     b.Navigation("Odev");
-
-                    b.Navigation("Ogrenci");
                 });
 #pragma warning restore 612, 618
         }

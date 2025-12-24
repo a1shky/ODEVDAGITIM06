@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ODEVDAGITIM06.Data;
 
@@ -11,9 +12,11 @@ using ODEVDAGITIM06.Data;
 namespace ODEVDAGITIM06.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251223182539_TeslimTablosuGuncelleme")]
+    partial class TeslimTablosuGuncelleme
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,7 +255,7 @@ namespace ODEVDAGITIM06.Migrations
 
                     b.HasKey("DersId");
 
-                    b.ToTable("Ders");
+                    b.ToTable("Dersler");
                 });
 
             modelBuilder.Entity("ODEVDAGITIM06.Models.Odev", b =>
@@ -288,7 +291,7 @@ namespace ODEVDAGITIM06.Migrations
 
                     b.HasIndex("OgrenciId");
 
-                    b.ToTable("Odev");
+                    b.ToTable("Odevler");
                 });
 
             modelBuilder.Entity("ODEVDAGITIM06.Models.Teslim", b =>
@@ -320,7 +323,7 @@ namespace ODEVDAGITIM06.Migrations
 
                     b.HasIndex("OgrenciId");
 
-                    b.ToTable("Teslim");
+                    b.ToTable("Teslimler");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

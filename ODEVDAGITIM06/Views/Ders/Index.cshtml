@@ -2,29 +2,15 @@
 
 @{
     ViewData["Title"] = "Ders Listesi";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Admin şablonumuzu kullan
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<!-- Page Heading -->
-<h1 class="h3 mb-2 text-gray-800">Ders Yönetimi</h1>
-<p class="mb-4">
-    Burada sistemdeki tüm dersleri yönetebilirsiniz.
-    <a asp-action="Create" class="btn btn-primary btn-sm">
-        <i class="fas fa-plus"></i> Yeni Ders Ekle
-    </a>
-</p>
-
-<!-- Hata Mesajı (eğer Controller'dan gelirse) -->
-@if (ViewBag.ErrorMessage != null)
-{
-    <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
-}
-
-
-<!-- DataTales Örneği -->
 <div class="card shadow mb-4">
-    <div class="card-header py-3">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
         <h6 class="m-0 font-weight-bold text-primary">Ders Listesi</h6>
+        <a asp-action="Create" class="btn btn-primary btn-sm">
+            <i class="fas fa-plus"></i> Yeni Ders Ekle
+        </a>
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -34,27 +20,24 @@
                         <th>Ders Adı</th>
                         <th>Ders Kodu</th>
                         <th>Açıklama</th>
-                        <th>İşlemler</th>
+                        <th style="width: 150px;">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model)
                     {
-                        <!-- Orijinal çalışan halimiz: Satıra ID verdik -->
-                        <tr id="row-@item.DersId">
+                        <tr>
                             <td>@item.DersAdi</td>
                             <td>@item.DersKodu</td>
                             <td>@item.DersAciklamasi</td>
                             <td>
-                                <!-- Düzenle Butonu -->
                                 <a asp-action="Edit" asp-route-id="@item.DersId" class="btn btn-warning btn-sm">
                                     <i class="fas fa-edit"></i> Düzenle
                                 </a>
 
-                                <!-- Orijinal çalışan Sil Butonumuz (Modal'ı tetikleyen) -->
-                                <a href="#" class="btn btn-danger btn-sm btn-sil" data-toggle="modal" data-target="#deleteModal" data-id="@item.DersId">
+                                <button type="button" class="btn btn-danger btn-sm btn-sil ml-1" data-id="@item.DersId">
                                     <i class="fas fa-trash"></i> Sil
-                                </a>
+                                </button>
                             </td>
                         </tr>
                     }
@@ -64,66 +47,57 @@
     </div>
 </div>
 
-
-<!-- GERİ GELDİ: Silme Onay Kutucuğu (Modal) -->
-<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Dersi Silme Onayı</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">Bu dersi kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">İptal</button>
-                <button id="btnConfirmDelete" class="btn btn-danger">Evet, Sil</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<!-- GERİ GELDİ: Orijinal Çalışan AJAX Script'imiz -->
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         $(document).ready(function () {
+            // Sil butonuna tıklandığında
+            $(".btn-sil").click(function () {
+                var btn = $(this);       // Tıklanan buton
+                var id = btn.data("id"); // Ders ID'si
+                var satir = btn.closest("tr"); // Tablodaki satırı
 
-            var silinecekDersId;
-
-            $('#deleteModal').on('show.bs.modal', function (event) {
-                var button = $(event.relatedTarget);
-                silinecekDersId = button.data('id');
-            });
-
-            $('#btnConfirmDelete').on('click', function () {
-
-                $.ajax({
-                    type: 'POST',
-                    url: '/Ders/Delete',
-                    data: { id: silinecekDersId },
-                    success: function (response) {
-                        if (response.success) {
-
-                            // Sayfayı yenilemeden, satırı kaybetme efekti
-                            $('#row-' + silinecekDersId).fadeOut('slow', function () {
-                                $(this).remove();
-                            });
-                            $('#deleteModal').modal('hide');
-                        } else {
-                            // Controller'dan hata mesajı gelirse (örn: Derse bağlı ödev var)
-                            alert(response.message);
-                            $('#deleteModal').modal('hide');
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        alert("Silme işlemi sırasında bir sunucu hatası oluştu.");
+                // Modern Soru Kutusu
+                Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "Bu dersi silmek istediğinize emin misiniz? ",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Evet, Sil!',
+                    cancelButtonText: 'İptal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // KULLANICI EVET DERSE
+                        $.ajax({
+                            url: '/Ders/SilAjax', // Controller'daki yeni metoda git
+                            type: 'POST',
+                            data: { id: id },
+                            success: function (response) {
+                                if (response.success) {
+                                    // Başarı Mesajı
+                                    Swal.fire(
+                                        'Silindi!',
+                                        response.message,
+                                        'success'
+                                    );
+                                    // Satırı sayfayı yenilemeden yok et
+                                    satir.fadeOut(500, function() {
+                                        $(this).remove();
+                                    });
+                                } else {
+                                    Swal.fire('Hata', response.message, 'error');
+                                }
+                            },
+                            error: function () {
+                                Swal.fire('Hata', 'Sunucu hatası oluştu.', 'error');
+                            }
+                        });
                     }
                 });
-
             });
-
         });
     </script>
 }

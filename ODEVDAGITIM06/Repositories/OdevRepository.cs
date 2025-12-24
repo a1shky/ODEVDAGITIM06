@@ -1,26 +1,59 @@
-﻿using Microsoft.EntityFrameworkCore; // .Include() METODU İÇİN BU GEREKLİ
+﻿using Microsoft.EntityFrameworkCore;
 using ODEVDAGITIM06.Data;
 using ODEVDAGITIM06.Models;
 using ODEVDAGITIM06.Repositories.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ODEVDAGITIM06.Repositories
 {
-    // Hem Repository<Odev>'den temel metotları alır
-    // hem de IOdevRepository sözleşmesini uygular.
     public class OdevRepository : Repository<Odev>, IOdevRepository
     {
+        private readonly ApplicationDbContext _appContext;
+
         public OdevRepository(ApplicationDbContext context) : base(context)
         {
-            // Base sınıfa (Repository<T>) context'i gönderiyoruz.
+            _appContext = context;
         }
 
-        // YENİ EKLENDİ: IOdevRepository'den gelen yeni metodu burada uyguluyoruz.
         public IEnumerable<Odev> GetAllWithDers()
         {
-            // Veritabanından Ödevler tablosunu alırken (.Odevler)
-            // .Include(o => o.Ders) komutuyla ilgili 'Ders' tablosundaki verileri de
-            // onlara bağlayıp (JOIN) öyle getiriyoruz.
-            return _context.Odevler.Include(o => o.Ders).ToList();
+            return _appContext.Odev
+                .Include(o => o.Ders)
+                .ToList();
+        }
+
+        public IEnumerable<Odev> GetAllWithDersAndOgrenci()
+        {
+            return _appContext.Odev
+                .Include(o => o.Ders)
+                .Include(o => o.Ogrenci) // Kişiye özel atamaları görebilmek için
+                .ToList();
+        }
+
+        // --- İŞTE DÜZELTİLEN METOT ---
+        public IEnumerable<Odev> GetOdevlerByOgrenciId(string ogrenciId)
+        {
+            // ESKİ HATALI KOD: _appContext.Teslim... (Sadece teslim edilenleri getiriyordu)
+            // YENİ DOĞRU KOD: _appContext.Odev... (Atanan ödevleri getirir)
+
+            return _appContext.Odev
+                .Include(o => o.Ders) // Ders adını görmek için Include
+                .Where(o =>
+                    // 1. Direkt bu öğrenciye atanmışsa (Harun'a özel)
+                    o.OgrenciId == ogrenciId
+
+                    // 2. VEYA (İstersen) Herkese açık/genel ödevleri de göster (OgrenciId boşsa)
+                    || o.OgrenciId == null
+                )
+                .OrderByDescending(o => o.TeslimTarihi) // En yakın teslim tarihli en üstte
+                .ToList();
+        }
+        // ------------------------------
+
+        public IEnumerable<Odev> GetOdevlerForOgrenci(string ogrenciId)
+        {
+            return GetOdevlerByOgrenciId(ogrenciId);
         }
     }
 }

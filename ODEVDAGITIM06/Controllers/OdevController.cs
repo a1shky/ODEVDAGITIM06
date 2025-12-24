@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore; // Hata yakalama için bu eklendi
+using Microsoft.EntityFrameworkCore;
 using ODEVDAGITIM06.Models;
 using ODEVDAGITIM06.Repositories.Interfaces;
 
@@ -12,28 +13,36 @@ namespace ODEVDAGITIM06.Controllers
     {
         private readonly IOdevRepository _odevRepository;
         private readonly IDersRepository _dersRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public OdevController(IOdevRepository odevRepository, IDersRepository dersRepository)
+        public OdevController(IOdevRepository odevRepository, IDersRepository dersRepository, UserManager<ApplicationUser> userManager)
         {
             _odevRepository = odevRepository;
             _dersRepository = dersRepository;
+            _userManager = userManager;
         }
 
-        // GET: /Odev
         public IActionResult Index()
         {
-            var odevler = _odevRepository.GetAllWithDers();
+            var odevler = _odevRepository.GetAllWithDersAndOgrenci();
             return View(odevler);
         }
 
-        // GET: /Odev/Create
         public IActionResult Create()
         {
             ViewBag.DersListesi = new SelectList(_dersRepository.GetAll(), "DersId", "DersAdi");
+
+            var ogrenciler = _userManager.Users.ToList();
+            var ogrenciSelectItems = ogrenciler.Select(u => new
+            {
+                Id = u.Id,
+                AdSoyad = $"{u.Ad} {u.Soyad} ({u.OgrenciNo})"
+            });
+
+            ViewBag.OgrenciListesi = new SelectList(ogrenciSelectItems, "Id", "AdSoyad");
             return View();
         }
 
-        // POST: /Odev/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Odev odev)
@@ -44,82 +53,62 @@ namespace ODEVDAGITIM06.Controllers
                 _odevRepository.Add(odev);
                 return RedirectToAction(nameof(Index));
             }
+
             ViewBag.DersListesi = new SelectList(_dersRepository.GetAll(), "DersId", "DersAdi", odev.DersId);
+            var ogrenciler = _userManager.Users.ToList();
+            var ogrenciSelectItems = ogrenciler.Select(u => new { Id = u.Id, AdSoyad = $"{u.Ad} {u.Soyad} ({u.OgrenciNo})" });
+            ViewBag.OgrenciListesi = new SelectList(ogrenciSelectItems, "Id", "AdSoyad", odev.OgrenciId);
+
             return View(odev);
         }
 
-
-        // YENİ EKLENDİ - GET: /Odev/Edit/5
-        // Düzenleme sayfasını GÖSTERİR (formu mevcut verilerle doldurur)
         public IActionResult Edit(int id)
         {
-            var odev = _odevRepository.GetById(id); // Ödevi ID'ye göre bul
-            if (odev == null)
-            {
-                return NotFound(); // Bulamazsa 404
-            }
+            var odev = _odevRepository.GetById(id);
+            if (odev == null) return NotFound();
 
-            // Düzenleme formuna da Ders listesi lazım (dropdown için)
-            // 'odev.DersId' parametresi, o anki dersin seçili gelmesini sağlar
             ViewBag.DersListesi = new SelectList(_dersRepository.GetAll(), "DersId", "DersAdi", odev.DersId);
-            return View(odev); // Bulursa, o ödevin bilgilerini View'e gönder
+            var ogrenciler = _userManager.Users.ToList();
+            var ogrenciSelectItems = ogrenciler.Select(u => new { Id = u.Id, AdSoyad = $"{u.Ad} {u.Soyad} ({u.OgrenciNo})" });
+            ViewBag.OgrenciListesi = new SelectList(ogrenciSelectItems, "Id", "AdSoyad", odev.OgrenciId);
+
+            return View(odev);
         }
 
-        // YENİ EKLENDİ - POST: /Odev/Edit/5
-        // Düzenleme formundan gelen veriyi KAYDEDER
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Odev odev)
         {
-            if (id != odev.OdevId)
-            {
-                return NotFound(); // Formdaki ID ile URL'deki ID uyuşmazsa 404
-            }
+            if (id != odev.OdevId) return NotFound();
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    // ÖNEMLİ: Formdan 'OlusturmaTarihi' gelmediği için
-                    // onu veritabanından alıp korumamız lazım.
-                    // Şimdilik basit repository'miz tüm nesneyi günceller.
-                    // Bu yüzden formda OlusturmaTarihi'ni gizli taşımalıyız (bir sonraki adımda yapacağız).
                     _odevRepository.Update(odev);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (_odevRepository.GetById(id) == null) return NotFound();
+                    else throw;
                 }
-                return RedirectToAction(nameof(Index)); // İşlem bittiyse Listeye geri dön
+                return RedirectToAction(nameof(Index));
             }
 
-            // Model geçerli değilse, formu hatalarla geri göster (dropdown'ı TEKRAR doldur)
             ViewBag.DersListesi = new SelectList(_dersRepository.GetAll(), "DersId", "DersAdi", odev.DersId);
+            var ogrenciler = _userManager.Users.ToList();
+            var ogrenciSelectItems = ogrenciler.Select(u => new { Id = u.Id, AdSoyad = $"{u.Ad} {u.Soyad} ({u.OgrenciNo})" });
+            ViewBag.OgrenciListesi = new SelectList(ogrenciSelectItems, "Id", "AdSoyad", odev.OgrenciId);
+
             return View(odev);
         }
 
-
-        // AJAX ile Silme Metodu (Bu zaten vardı)
-        [HttpPost]
-        public IActionResult Delete(int id)
+        [HttpPost, ActionName("Delete")]
+        public IActionResult DeleteConfirmed(int id)
         {
-            try
-            {
-                var odev = _odevRepository.GetById(id);
-                if (odev == null)
-                {
-                    return Json(new { success = false, message = "Ödev bulunamadı." });
-                }
-
-                _odevRepository.Delete(odev);
-
-                return Json(new { success = true, message = "Ödev başarıyla silindi." });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "Silme işlemi sırasında bir hata oluştu." });
-            }
+            _odevRepository.Delete(id);
+            return RedirectToAction(nameof(Index));
         }
 
-    }
-}
+    } // Class kapatma parantezi
+} // Namespace kapatma parantezi

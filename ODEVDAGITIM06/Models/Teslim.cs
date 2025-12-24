@@ -1,4 +1,6 @@
-﻿namespace ODEVDAGITIM06.Models // Proje adına göre güncellendi
+﻿using System.ComponentModel.DataAnnotations.Schema; // ForeignKey için gerekli
+
+namespace ODEVDAGITIM06.Models
 {
     public class Teslim
     {
@@ -9,5 +11,12 @@
 
         public int OdevId { get; set; }
         public virtual Odev? Odev { get; set; }
+
+        // YENİ EKLENDİ: Öğrenci İlişkisi
+        // String çünkü IdentityUser'ın ID'si varsayılan olarak string'dir (GUID)
+        public string? OgrenciId { get; set; }
+
+        [ForeignKey("OgrenciId")]
+        public virtual ApplicationUser? Ogrenci { get; set; }
     }
 }

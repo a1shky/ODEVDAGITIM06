@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore; // Edit metodundaki hata yakalama için
+using Microsoft.EntityFrameworkCore;
 using ODEVDAGITIM06.Models;
 using ODEVDAGITIM06.Repositories.Interfaces;
 
@@ -16,8 +16,6 @@ namespace ODEVDAGITIM06.Controllers
             _dersRepository = dersRepository;
         }
 
-        // --- BU METOTLAR AYNI KALDI ---
-        // (Index'ten 'TempData' kontrolü kaldırıldı, temizlendi)
         public IActionResult Index()
         {
             var dersler = _dersRepository.GetAll();
@@ -44,10 +42,7 @@ namespace ODEVDAGITIM06.Controllers
         public IActionResult Edit(int id)
         {
             var ders = _dersRepository.GetById(id);
-            if (ders == null)
-            {
-                return NotFound();
-            }
+            if (ders == null) return NotFound();
             return View(ders);
         }
 
@@ -55,10 +50,7 @@ namespace ODEVDAGITIM06.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(int id, Ders ders)
         {
-            if (id != ders.DersId)
-            {
-                return NotFound();
-            }
+            if (id != ders.DersId) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -68,44 +60,26 @@ namespace ODEVDAGITIM06.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    throw;
+                    if (_dersRepository.GetById(id) == null) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(ders);
         }
-        // --- BU METOTLAR AYNI KALDI ---
 
-
-        // GERİ DÖNÜLDÜ: BİZİM ÇALIŞAN MODERN $.ajax YÖNTEMİMİZ
-        // Bu metot, JavaScript'e (AJAX'a) JSON olarak cevap verir.
-        // [ValidateAntiForgeryToken] KULLANMIYORUZ (basit AJAX çağrısı)
+        // --- AJAX İÇİN ÖZEL SİLME METODU (JSON DÖNER) ---
         [HttpPost]
-        public IActionResult Delete(int id)
+        public IActionResult SilAjax(int id)
         {
-            try
+            var ders = _dersRepository.GetById(id);
+            if (ders != null)
             {
-                var ders = _dersRepository.GetById(id);
-                if (ders == null)
-                {
-                    // Bulamazsa JS'e hata JSON'ı döndür
-                    return Json(new { success = false, message = "Ders bulunamadı." });
-                }
-
-                // Dersi sil
-                _dersRepository.Delete(ders);
-
-                // JS'e başarılı olduğuna dair bir JSON mesajı döndür
+                _dersRepository.Delete(id);
+                // HTML yerine JSON dönüyoruz ki AJAX anlasın
                 return Json(new { success = true, message = "Ders başarıyla silindi." });
             }
-            catch (Exception ex)
-            {
-                // Hata olursa (örn: bu derse bağlı ödevler varsa)
-                // JS'e hata JSON'ı döndür
-                return Json(new { success = false, message = "Silme işlemi başarısız. Bu derse bağlı ödevler olabilir." });
-            }
+            return Json(new { success = false, message = "Silinecek ders bulunamadı." });
         }
-        // DEĞİŞİKLİĞİN SONU
-
     }
 }

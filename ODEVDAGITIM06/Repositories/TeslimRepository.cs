@@ -1,27 +1,37 @@
-﻿using Microsoft.EntityFrameworkCore; // .Include() METODU İÇİN BU GEREKLİ
-using ODEVDAGITIM06.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using ODEVDAGITIM06.Data; // Context'in olduğu yer
 using ODEVDAGITIM06.Models;
 using ODEVDAGITIM06.Repositories.Interfaces;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ODEVDAGITIM06.Repositories
 {
-    // Hem Repository<Teslim>'den temel metotları alır
-    // hem de ITeslimRepository sözleşmesini uygular.
     public class TeslimRepository : Repository<Teslim>, ITeslimRepository
     {
+        // Context'e erişmek için
+        private readonly ApplicationDbContext _context;
+
         public TeslimRepository(ApplicationDbContext context) : base(context)
         {
-            // Base sınıfa (Repository<T>) context'i gönderiyoruz.
+            _context = context;
         }
 
-        // YENİ EKLENDİ: ITeslimRepository'den gelen yeni metodu burada uyguluyoruz.
         public IEnumerable<Teslim> GetAllWithOdevDers()
         {
-            // Veritabanından Teslimler tablosunu alırken
-            return _context.Teslimler
-                .Include(t => t.Odev)         // Teslimin ait olduğu Ödevi de getir
-                .Include(t => t.Odev.Ders)    // O Ödevin ait olduğu Dersi de getir
+            return _context.Teslim
+                .Include(t => t.Ogrenci)
+                .Include(t => t.Odev).ThenInclude(o => o.Ders)
                 .ToList();
+        }
+
+        // YENİ EKLEDİĞİMİZ METOT (BURASI KRİTİK)
+        public Teslim GetByIdWithDetails(int id)
+        {
+            return _context.Teslim
+                .Include(t => t.Ogrenci)              // Öğrenciyi getir
+                .Include(t => t.Odev).ThenInclude(o => o.Ders) // Ödevi ve Dersi getir
+                .FirstOrDefault(t => t.TeslimId == id);
         }
     }
 }

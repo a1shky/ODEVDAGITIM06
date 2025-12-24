@@ -2,55 +2,74 @@
 
 @{
     ViewData["Title"] = "Yeni Ödev Ekle";
-    Layout = "~/Views/Shared/_AdminLayout.cshtml"; // Admin şablonumuzu kullan
+    // Eğer admin panelinin tasarım dosyası _Layout ise burayı _Layout yapabilirsin.
+    // Şimdilik senin kodundaki gibi _AdminLayout bırakıyorum.
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1 class="h3 mb-2 text-gray-800">Yeni Ödev Ekle</h1>
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800"><i class="fas fa-plus-square"></i> Yeni Ödev Ekle</h1>
 
-<div class="card shadow mb-4">
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-8">
-                <!-- Form, OdevController'daki [HttpPost] Create metoduna gider -->
-                <form asp-action="Create" method="post">
-                    @Html.AntiForgeryToken()
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">Ödev Oluşturma Formu</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group mb-3">
+                            <label asp-for="DersId" class="font-weight-bold">Hangi Ders?</label>
+                            <select asp-for="DersId" class="form-control" asp-items="ViewBag.DersListesi">
+                                <option value="">-- Bir Ders Seçin --</option>
+                            </select>
+                            <span asp-validation-for="DersId" class="text-danger"></span>
+                        </div>
 
-                    <!-- En Önemli Kısım: Hangi Derse ait? (Açılır Liste) -->
-                    <div class="form-group mb-3">
-                        <label asp-for="DersId" class="control-label">Hangi Ders?</label>
-                        <!-- Controller'dan gelen ViewBag.DersListesi'ni burada kullanıyoruz -->
-                        <select asp-for="DersId" class="form-control" asp-items="ViewBag.DersListesi">
-                            <option value="">-- Bir Ders Seçin --</option>
-                        </select>
-                        <span asp-validation-for="DersId" class="text-danger"></span>
-                    </div>
+                        <div class="form-group mb-3 p-3 bg-light border rounded">
+                            <label asp-for="OgrenciId" class="font-weight-bold text-danger">
+                                <i class="fas fa-user-graduate"></i> Hangi Öğrenciye Verilecek?
+                            </label>
+                            <select asp-for="OgrenciId" class="form-control" asp-items="ViewBag.OgrenciListesi">
+                                <option value="">-- Tüm Sınıf (Genel Ödev) --</option>
+                            </select>
+                            <span asp-validation-for="OgrenciId" class="text-danger"></span>
+                            <small class="text-muted d-block mt-1">
+                                <i class="fas fa-info-circle"></i> Eğer belirli bir öğrenci seçerseniz, ödevi sadece o kişi görür. Seçmezseniz dersi alan herkes görür.
+                            </small>
+                        </div>
 
-                    <div class="form-group mb-3">
-                        <label asp-for="OdevBasligi" class="control-label">Ödev Başlığı</label>
-                        <input asp-for="OdevBasligi" class="form-control" />
-                        <span asp-validation-for="OdevBasligi" class="text-danger"></span>
-                    </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="OdevBasligi" class="font-weight-bold">Ödev Başlığı</label>
+                            <input asp-for="OdevBasligi" class="form-control" placeholder="Örn: Final Projesi" />
+                            <span asp-validation-for="OdevBasligi" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group mb-3">
-                        <label asp-for="Aciklama" class="control-label">Açıklama</label>
-                        <textarea asp-for="Aciklama" class="form-control" rows="5"></textarea>
-                        <span asp-validation-for="Aciklama" class="text-danger"></span>
-                    </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="Aciklama" class="font-weight-bold">Açıklama</label>
+                            <textarea asp-for="Aciklama" class="form-control" rows="5" placeholder="Ödev detaylarını buraya giriniz..."></textarea>
+                            <span asp-validation-for="Aciklama" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group mb-3">
-                        <label asp-for="TeslimTarihi" class="control-label">Son Teslim Tarihi</label>
-                        <!-- type="datetime-local" güzel bir tarih/saat seçici çıkarır -->
-                        <input asp-for="TeslimTarihi" class="form-control" type="datetime-local" />
-                        <span asp-validation-for="TeslimTarihi" class="text-danger"></span>
-                    </div>
+                        <div class="form-group mb-3">
+                            <label asp-for="TeslimTarihi" class="font-weight-bold">Son Teslim Tarihi</label>
+                            <input asp-for="TeslimTarihi" class="form-control" type="datetime-local" />
+                            <span asp-validation-for="TeslimTarihi" class="text-danger"></span>
+                        </div>
 
-                    <div class="form-group mb-3">
-                        <input type="submit" value="Kaydet" class="btn btn-success" />
-                        <a asp-action="Index" class="btn btn-light">Listeye Geri Dön</a>
-                    </div>
-                </form>
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg ml-2">
+                                <i class="fas fa-arrow-left"></i> Listeye Dön
+                            </a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
